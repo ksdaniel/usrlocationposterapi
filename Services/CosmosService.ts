@@ -35,4 +35,17 @@ export class CosmosService {
         return [];
     }
 
+    public async deleteItem(id: string): Promise<any> {
+
+        const cosmosClient = new CosmosClient({ endpoint: this.endpoint, key: this.key });
+
+        const result = await cosmosClient
+            .database(this.databaseId)
+            .container(this.containerId)
+            .item(id)
+            .delete();
+
+        return result;
+    }
+
 }

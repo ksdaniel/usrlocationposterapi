@@ -16,7 +16,7 @@ export class CosmosService {
         const cosmosClient = new CosmosClient({ endpoint: this.endpoint, key: this.key });
 
         const querySpec = {
-            query: `SELECT * FROM ${this.containerId} c order by c.timestamp desc`,
+            query: `SELECT * FROM ${this.containerId} c order by c.time desc`,
             parameters: []
         };
 

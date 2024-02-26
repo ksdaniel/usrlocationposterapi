@@ -11,7 +11,7 @@ export class CosmosService {
     constructor() {
     }
 
-    public async getItems(filter?: string, filterValue?: string): Promise<any> {
+    public async getItems(filter?: string): Promise<any> {
 
         const cosmosClient = new CosmosClient({ endpoint: this.endpoint, key: this.key });
 
@@ -20,20 +20,20 @@ export class CosmosService {
         //     parameters: []
         // };
 
-        let queryText = `SELECT * FROM ${this.containerId} c`;
-        if (filter && filterValue) {
-            queryText += ` WHERE c.${filter} = @filterValue`;
+        let orderBy = "order by c.time desc OFFSET 0 LIMIT 2000";
+        let queryString = `SELECT * FROM ${this.containerId} c `;
+
+        if (filter) {
+            queryString += this.getQueryFilterString(filter);
         }
 
+        queryString += ` ${orderBy}`;
+
         const querySpec = {
-            query: queryText,
-            parameters: [
-                {
-                    name: "@filterValue",
-                    value: filterValue
-                }
-            ]
+            query: queryString,
+            parameters: []
         };
+
 
         const result = await cosmosClient
             .database(this.databaseId)
@@ -62,6 +62,32 @@ export class CosmosService {
             .delete();
 
         return result;
+    }
+
+
+    //extract field name, verb and value from filter and return query filter
+    private getQueryFilterString(filter: string) : string {
+        let fieldName: string = "";
+        let verb: string = "";
+        let value: string = "";
+
+        if (filter) {
+            const filterParts = filter.split(" ");
+            if (filterParts.length === 3) {
+                fieldName = filterParts[0];
+                verb = filterParts[1];
+                value = filterParts[2];
+            }
+        }
+
+        let queryString = "";
+        if (fieldName && verb && value) {
+            queryString = `WHERE c.${fieldName} ${verb} '${value}'`;
+        } else {
+            queryString = "";
+        }
+
+        return queryString;
     }
 
 }

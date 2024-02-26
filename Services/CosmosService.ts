@@ -11,13 +11,28 @@ export class CosmosService {
     constructor() {
     }
 
-    public async getItems(): Promise<any> {
+    public async getItems(filter?: string, filterValue?: string): Promise<any> {
 
         const cosmosClient = new CosmosClient({ endpoint: this.endpoint, key: this.key });
 
+        // const querySpec = {
+        //     query: `SELECT * FROM ${this.containerId} c order by c.time desc OFFSET 0 LIMIT 2000`,
+        //     parameters: []
+        // };
+
+        let queryText = `SELECT * FROM ${this.containerId} c`;
+        if (filter && filterValue) {
+            queryText += ` WHERE c.${filter} = @filterValue`;
+        }
+
         const querySpec = {
-            query: `SELECT * FROM ${this.containerId} c order by c.time desc OFFSET 0 LIMIT 2000`,
-            parameters: []
+            query: queryText,
+            parameters: [
+                {
+                    name: "@filterValue",
+                    value: filterValue
+                }
+            ]
         };
 
         const result = await cosmosClient

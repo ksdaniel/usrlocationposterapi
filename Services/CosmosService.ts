@@ -16,7 +16,7 @@ export class CosmosService {
         const cosmosClient = new CosmosClient({ endpoint: this.endpoint, key: this.key });
 
         const querySpec = {
-            query: `SELECT * FROM ${this.containerId} c order by c.time desc`,
+            query: `SELECT * FROM ${this.containerId} c order by c.time desc OFFSET 0 LIMIT 2000`,
             parameters: []
         };
 
@@ -24,8 +24,9 @@ export class CosmosService {
             .database(this.databaseId)
             .container(this.containerId)
             .items.query(querySpec)
-            .fetchNext();
+            .fetchAll();
 
+        
 
         if (result && result.resources) {
             // Process the retrieved items

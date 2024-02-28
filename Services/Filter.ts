@@ -1,14 +1,12 @@
-export type Verbs = "eq" | "ne" | "gt" | "ge" | "lt" | "le" | "and" | "or" | "not" | "in" | "contains" | "startswith" | "endswith";
-
 export interface Filter {
     field: string;
-    verb: Verbs;
+    verb: string;
     value: string;
 }
 
 export class FilterService {
 
-    public static verbToSqlOperator(verb: Verbs): string {
+    public static verbToSqlOperator(verb: string): string {
         switch (verb) {
             case "eq":
                 return "=";
@@ -41,15 +39,33 @@ export class FilterService {
         }
     }
 
-    public static isVerb(verb: string): boolean {
-        
-        
+    //check if verb is valid verb
+    public static isValidVerb(verb: string): boolean {
+        switch (verb) {
+            case "eq":
+            case "ne":
+            case "gt":
+            case "ge":
+            case "lt":
+            case "le":
+            case "and":
+            case "or":
+            case "not":
+            case "in":
+            case "contains":
+            case "startswith":
+            case "endswith":
+                return true;
+            default:
+                return false;
+        }
     }
+
 
     public static getFilterString(filter: Filter): string {
         let queryString = "";
         if (filter.field && filter.verb && filter.value) {
-            queryString = ` WHERE c.${filter.field} ${this.verbToSqlOperator(filter.verb)} '${filter.value}'`;
+            queryString = `WHERE c.${filter.field} ${this.verbToSqlOperator(filter.verb)} '${filter.value}'`;
         }
         return queryString;
     }
@@ -60,26 +76,13 @@ export class FilterService {
         let value: string = "";
 
         if (filter) {
-            const filterParts = filter.split(" ");
-            if (filterParts.length === 3) {
-                fieldName = filterParts[0];
-                verb = filterParts[1];
-                value = filterParts[2];
+            const filterArray = filter.split(" ");
+            if (filterArray.length === 3) {
+                fieldName = filterArray[0];
+                verb = filterArray[1];
+                value = filterArray[2];
             }
         }
-
-        //check if verb is of type Verbs
-        if (verb && !Object.values(Verbs).includes(verb as Verbs)) {
-            throw new Error(`Invalid verb: ${verb}`);
-        }
-
-        let queryString = "";
-        if (fieldName && verb && value) {
-            queryString = ` WHERE c.${fieldName} ${verb} '${value}'`;
-        } else {
-            queryString = "";
-        }
-
-        return queryString;
+        return this.getFilterString({ field: fieldName, verb: verb, value: value } as Filter);
     }
 }

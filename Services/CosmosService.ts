@@ -1,4 +1,5 @@
 const { CosmosClient } = require("@azure/cosmos");
+import { FilterService } from "./Filter";
 
 export class CosmosService {
 
@@ -24,7 +25,7 @@ export class CosmosService {
         let queryString = `SELECT * FROM ${this.containerId} c `;
 
         if (filter) {
-            queryString += this.getQueryFilterString(filter);
+            queryString += FilterService.stringToFilterString(filter);
         }
 
         queryString += ` ${orderBy}`;
@@ -40,8 +41,6 @@ export class CosmosService {
             .container(this.containerId)
             .items.query(querySpec)
             .fetchAll();
-
-        
 
         if (result && result.resources) {
             // Process the retrieved items
@@ -62,32 +61,6 @@ export class CosmosService {
             .delete();
 
         return result;
-    }
-
-
-    //extract field name, verb and value from filter and return query filter
-    private getQueryFilterString(filter: string) : string {
-        let fieldName: string = "";
-        let verb: string = "";
-        let value: string = "";
-
-        if (filter) {
-            const filterParts = filter.split(" ");
-            if (filterParts.length === 3) {
-                fieldName = filterParts[0];
-                verb = filterParts[1];
-                value = filterParts[2];
-            }
-        }
-
-        let queryString = "";
-        if (fieldName && verb && value) {
-            queryString = `WHERE c.${fieldName} ${verb} '${value}'`;
-        } else {
-            queryString = "";
-        }
-
-        return queryString;
     }
 
 }

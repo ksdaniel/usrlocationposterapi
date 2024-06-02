@@ -21,7 +21,7 @@ export class CosmosService {
         //     parameters: []
         // };
 
-        let orderBy = "order by c.time desc OFFSET 0 LIMIT 2000";
+        let orderBy = "order by c.time desc OFFSET 0 LIMIT 5000";
         let queryString = `SELECT * FROM ${this.containerId} c `;
 
         if (filter) {

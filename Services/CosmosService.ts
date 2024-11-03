@@ -21,7 +21,7 @@ export class CosmosService {
         //     parameters: []
         // };
 
-        let orderBy = "order by c.time desc OFFSET 0 LIMIT 5000";
+        let orderBy = "order by c.time desc OFFSET 0 LIMIT 100000";
         let queryString = `SELECT * FROM ${this.containerId} c `;
 
         if (filter) {
@@ -62,5 +62,33 @@ export class CosmosService {
 
         return result;
     }
+
+    public async updateItem(id: string, item: any): Promise<any> {
+            
+            const cosmosClient = new CosmosClient({ endpoint: this.endpoint, key: this.key });
+    
+            console.log("Updating item with id: ", id);
+
+            const container = await cosmosClient
+                .database(this.databaseId)
+                .container(this.containerId);
+
+            
+            const { resource: existingItem } = await container.item(id, id).read();
+
+            console.log("Existing item: ", existingItem);
+
+            const updatedItem = { ...existingItem, ...item };
+
+            console.log("Updated item: ", updatedItem);
+
+            const result = await cosmosClient
+                .database(this.databaseId)
+                .container(this.containerId)
+                .item(id)
+                .replace(updatedItem);
+    
+            return updatedItem;
+        }
 
 }
